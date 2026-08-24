@@ -15,5 +15,6 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    host: true, // escuta em 0.0.0.0 — necessário pra acessar do celular/outro dispositivo na rede local
   },
 })
