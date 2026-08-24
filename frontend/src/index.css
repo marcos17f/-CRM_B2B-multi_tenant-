@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Consolas, monospace;
+
+  --color-accent: #22d3a8;
+  --color-accent-2: #3b82f6;
+  --color-danger: #f2495c;
+  --color-warning: #f5a623;
+
+  --color-bg: var(--bg);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-bg-subtle: var(--bg-subtle);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-text-faint: var(--text-faint);
+  --color-sidebar: var(--sidebar-bg);
+  --color-topbar: var(--topbar-bg);
+}
+
+:root {
+  --bg: #f4f5f7;
+  --bg-elevated: #ffffff;
+  --bg-subtle: #eceef1;
+  --surface: #ffffff;
+  --surface-hover: #f4f5f7;
+  --border: #e2e4e9;
+  --border-strong: #cbced6;
+  --text: #14151a;
+  --text-muted: #5b5f6b;
+  --text-faint: #8a8e99;
+  --sidebar-bg: #ffffff;
+  --topbar-bg: #ffffff;
+  --ring: var(--color-accent);
+}
+
+.dark {
+  --bg: #0a0b0d;
+  --bg-elevated: #131519;
+  --bg-subtle: #17191e;
+  --surface: #15171b;
+  --surface-hover: #1c1f25;
+  --border: #23262d;
+  --border-strong: #33363f;
+  --text: #f2f3f5;
+  --text-muted: #9ba0ab;
+  --text-faint: #6b7080;
+  --sidebar-bg: #0d0e11;
+  --topbar-bg: #0d0e11;
+  --ring: var(--color-accent);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--color-accent) 35%, transparent);
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 999px;
+  }
+}
