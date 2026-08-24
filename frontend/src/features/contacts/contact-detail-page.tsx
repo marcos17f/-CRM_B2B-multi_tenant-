@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { ArrowLeft, Pencil, Trash2, User, Building2 } from 'lucide-react'
+import { ArrowLeft, MessageCircle, Pencil, Trash2, User, Building2 } from 'lucide-react'
 import { useCompany, useContact, useDeleteContact } from '@/hooks/queries'
 import { PermissionGate } from '@/components/permission-gate'
 import { Button } from '@/components/ui/button'
@@ -12,6 +12,7 @@ import { TaskList } from '@/components/task-list'
 import { EmptyState } from '@/components/empty-state'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ContactFormDialog } from './contact-form-dialog'
+import { SendWhatsappDialog } from './send-whatsapp-dialog'
 import { extractErrorMessage } from '@/lib/utils'
 
 export function ContactDetailPage() {
@@ -21,6 +22,7 @@ export function ContactDetailPage() {
   const { data: company } = useCompany(contact?.companyId ?? undefined)
   const deleteContact = useDeleteContact()
   const [editOpen, setEditOpen] = useState(false)
+  const [whatsappOpen, setWhatsappOpen] = useState(false)
 
   if (isLoading) return <Skeleton className="m-6 h-96" />
   if (!contact || !id) return <EmptyState title="Contato não encontrado" />
@@ -53,6 +55,13 @@ export function ContactDetailPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {contact.phone && (
+            <PermissionGate permission="whatsapp:send">
+              <Button variant="secondary" size="sm" onClick={() => setWhatsappOpen(true)}>
+                <MessageCircle className="h-3.5 w-3.5 mr-1.5" /> WhatsApp
+              </Button>
+            </PermissionGate>
+          )}
           <PermissionGate permission="contacts:write">
             <Button variant="secondary" size="sm" onClick={() => setEditOpen(true)}>
               <Pencil className="h-3.5 w-3.5 mr-1.5" /> Editar
@@ -114,6 +123,7 @@ export function ContactDetailPage() {
       </div>
 
       <ContactFormDialog open={editOpen} onOpenChange={setEditOpen} contact={contact} />
+      {contact.phone && <SendWhatsappDialog open={whatsappOpen} onOpenChange={setWhatsappOpen} contact={contact} />}
     </div>
   )
 }

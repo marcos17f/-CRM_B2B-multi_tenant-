@@ -36,6 +36,7 @@ export const PERMISSIONS = {
   EQUIPMENT_WRITE: 'equipment:write',
   SERVICE_ORDERS_READ: 'service_orders:read',
   SERVICE_ORDERS_WRITE: 'service_orders:write',
+  AI_MANAGE: 'ai:manage', // Central de I.A. — chave de API, toggles do agente
   MEMBERS_MANAGE: 'members:manage', // convidar/remover pessoas, mudar role
   WORKSPACE_MANAGE: 'workspace:manage', // configurações do workspace, plano/branding
 } as const;
@@ -61,6 +62,7 @@ export const SYSTEM_ROLES: Record<string, string[]> = {
     'products:*',
     'equipment:*',
     'service_orders:*',
+    'ai:manage',
     'members:manage',
   ],
   sales_rep: [

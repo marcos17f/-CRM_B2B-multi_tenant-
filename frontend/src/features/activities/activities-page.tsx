@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Building2, User, Target, Search } from 'lucide-react'
-import { useCompanies, useContacts, useOpportunities } from '@/hooks/queries'
+import { Building2, User, Target, Search, Wrench, ClipboardList } from 'lucide-react'
+import { useCompanies, useContacts, useOpportunities, useEquipmentList, useServiceOrders } from '@/hooks/queries'
 import { PageHeader } from '@/components/page-header'
 import { EmptyState } from '@/components/empty-state'
 import { Input } from '@/components/ui/input'
@@ -14,6 +14,8 @@ export function ActivitiesPage() {
   const { data: companies } = useCompanies()
   const { data: contacts } = useContacts()
   const { data: opportunities } = useOpportunities()
+  const { data: equipmentItems } = useEquipmentList()
+  const { data: serviceOrders } = useServiceOrders()
 
   const [query, setQuery] = useState('')
   const [selected, setSelected] = useState<Entry | null>(null)
@@ -32,8 +34,15 @@ export function ActivitiesPage() {
       label: o.name,
       sublabel: 'Oportunidade',
     }))
-    return [...companyEntries, ...contactEntries, ...opportunityEntries]
-  }, [companies, contacts, opportunities])
+    const equipmentEntries = (equipmentItems ?? []).map((e) => ({ type: 'equipment' as const, id: e.id, label: e.name, sublabel: 'Equipamento' }))
+    const serviceOrderEntries = (serviceOrders ?? []).map((so) => ({
+      type: 'service_order' as const,
+      id: so.id,
+      label: so.description ?? `OS ${so.id.slice(0, 8)}`,
+      sublabel: 'Ordem de serviço',
+    }))
+    return [...companyEntries, ...contactEntries, ...opportunityEntries, ...equipmentEntries, ...serviceOrderEntries]
+  }, [companies, contacts, opportunities, equipmentItems, serviceOrders])
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -41,7 +50,13 @@ export function ActivitiesPage() {
     return entries.filter((e) => e.label.toLowerCase().includes(q)).slice(0, 30)
   }, [entries, query])
 
-  const ICONS: Record<RelatedToType, typeof Building2> = { company: Building2, contact: User, opportunity: Target }
+  const ICONS: Record<RelatedToType, typeof Building2> = {
+    company: Building2,
+    contact: User,
+    opportunity: Target,
+    equipment: Wrench,
+    service_order: ClipboardList,
+  }
 
   return (
     <div className="flex h-full">
@@ -78,7 +93,7 @@ export function ActivitiesPage() {
       <div className="flex-1 flex flex-col overflow-hidden">
         <PageHeader
           title="Atividades"
-          description={selected ? `Timeline de ${selected.label}` : 'Selecione uma empresa, contato ou oportunidade'}
+          description={selected ? `Timeline de ${selected.label}` : 'Selecione um item na lista ao lado'}
         />
         <div className="flex-1 overflow-y-auto p-6">
           {selected ? (

@@ -3,8 +3,10 @@ import { ConfigService } from '@nestjs/config';
 import { sql, type Kysely } from 'kysely';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import type { Database } from '../../db/types';
+import { AiAgentService } from '../ai-agent/ai-agent.service';
 import { setWhatsappWebhookLookupContext, setWorkspaceRlsContext } from '../common/tenant/set-workspace-rls';
 import { KYSELY_RAW } from '../database/database.constants';
+import { sendWhatsappTextMessage } from './whatsapp-graph-client';
 import { normalizeWhatsappPhone } from './whatsapp-phone.util';
 
 interface WhatsappWebhookMessage {
@@ -49,6 +51,7 @@ export class WhatsappWebhookService {
   constructor(
     @Inject(KYSELY_RAW) private readonly db: Kysely<Database>,
     private readonly config: ConfigService,
+    private readonly aiAgent: AiAgentService,
   ) {}
 
   /** GET /webhooks/whatsapp — handshake de verificação exigido pela Meta ao configurar o webhook. */
@@ -191,7 +194,63 @@ export class WhatsappWebhookService {
           status: 'received',
         })
         .execute();
+
+      await this.maybeSendAutonomousReply(trx, workspaceId, contact.id);
     });
+  }
+
+  /**
+   * Se a Central de I.A. está ligada (enabled + agentEnabled + api_key) pro workspace,
+   * gera e envia uma resposta autônoma — vira uma activity/whatsapp_message outbound com
+   * actorId null (é assim que MessagingMetricsService distingue humano de automação).
+   * Falha silenciosamente (loga e segue) — um erro de IA nunca deve derrubar o webhook.
+   */
+  private async maybeSendAutonomousReply(trx: Kysely<Database>, workspaceId: string, contactId: string): Promise<void> {
+    try {
+      const replyText = await this.aiAgent.generateReply(trx, workspaceId, contactId);
+      if (!replyText) return;
+
+      const connection = await trx
+        .selectFrom('integrationConnections')
+        .selectAll()
+        .where('workspaceId', '=', workspaceId)
+        .where('provider', '=', 'whatsapp')
+        .where('status', '=', 'active')
+        .executeTakeFirst();
+      if (!connection) return;
+
+      const contact = await trx.selectFrom('contacts').select('phone').where('id', '=', contactId).executeTakeFirst();
+      if (!contact?.phone) return;
+
+      const graphApiVersion = this.config.get<string>('WHATSAPP_GRAPH_API_VERSION') ?? 'v20.0';
+      const { wamid } = await sendWhatsappTextMessage({
+        graphApiVersion,
+        phoneNumberId: connection.externalId,
+        accessToken: connection.accessToken,
+        to: normalizeWhatsappPhone(contact.phone),
+        body: replyText,
+      });
+
+      const activity = await trx
+        .insertInto('activities')
+        .values({
+          workspaceId,
+          type: 'whatsapp',
+          relatedToType: 'contact',
+          relatedToId: contactId,
+          actorId: null,
+          payload: { direction: 'outbound', message: replyText, wamid, automated: true },
+        })
+        .returningAll()
+        .executeTakeFirstOrThrow();
+
+      await trx
+        .insertInto('whatsappMessages')
+        .values({ workspaceId, wamid, direction: 'outbound', contactId, activityId: activity.id, status: 'sent' })
+        .execute();
+    } catch (err) {
+      this.logger.warn(`Falha ao enviar resposta autônoma de IA (workspace ${workspaceId}): ${(err as Error).message}`);
+    }
   }
 
   private async handleStatusUpdate(workspaceId: string, status: WhatsappWebhookStatus): Promise<void> {

@@ -44,7 +44,7 @@ npm run start:dev             # http://localhost:3000 — docs interativos em /d
 ```
 
 Login de demonstração criado pelo seed: **demo@flow89.com** / **demo1234** (workspace
-`flow89-demo`, role `owner`).
+`marcoslab`, role `owner`).
 
 Se preferir Postgres local em vez de Docker, só aponte `DATABASE_URL` no `.env` pro seu
 banco — o runner de migrations não depende do Docker Compose, só de uma `DATABASE_URL`

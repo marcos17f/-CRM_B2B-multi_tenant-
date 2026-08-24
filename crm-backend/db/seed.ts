@@ -42,7 +42,7 @@ async function main() {
 
     const workspace = await trx
       .insertInto('workspaces')
-      .values({ name: 'Flow89 Demo', slug: 'flow89-demo', status: 'active' })
+      .values({ name: 'MarcosLab', slug: 'marcoslab', status: 'active' })
       .returningAll()
       .executeTakeFirstOrThrow();
 
@@ -199,7 +199,7 @@ async function main() {
       .execute();
   });
 
-  console.log(`Seed aplicado. Login demo: ${DEMO_EMAIL} / ${DEMO_PASSWORD} (workspace "flow89-demo").`);
+  console.log(`Seed aplicado. Login demo: ${DEMO_EMAIL} / ${DEMO_PASSWORD} (workspace "marcoslab").`);
   await db.destroy();
 }
 

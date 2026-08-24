@@ -17,6 +17,8 @@ import { CampaignDetailPage } from '@/features/campaigns/campaign-detail-page'
 import { ActivitiesPage } from '@/features/activities/activities-page'
 import { OperationsPage } from '@/features/operations/operations-page'
 import { ReportsPage } from '@/features/reports/reports-page'
+import { SegmentsPage } from '@/features/segments/segments-page'
+import { CatalogPage } from '@/features/catalog/catalog-page'
 import { SettingsPage } from '@/features/settings/settings-page'
 
 export default function App() {
@@ -42,6 +44,8 @@ export default function App() {
           <Route path="/activities" element={<ActivitiesPage />} />
           <Route path="/operations" element={<OperationsPage />} />
           <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/segments" element={<SegmentsPage />} />
+          <Route path="/catalog" element={<CatalogPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
       </Route>

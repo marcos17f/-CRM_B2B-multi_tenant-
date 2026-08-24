@@ -26,6 +26,17 @@ export class ActivitiesService {
       .execute();
   }
 
+  /** Feed do workspace inteiro (Visão Geral) — sem filtrar por entidade. O front resolve os nomes usando as listas que já tem em cache (companies/contacts/opportunities/equipment/service-orders). */
+  listRecent(limit: number) {
+    return this.tenantDb.db
+      .selectFrom('activities')
+      .selectAll()
+      .where('workspaceId', '=', this.tenantDb.workspaceId)
+      .orderBy('occurredAt', 'desc')
+      .limit(limit)
+      .execute();
+  }
+
   /**
    * Uso interno — chamado por outros services (OpportunitiesService.moveStage,
    * TasksService.complete...) pra registrar eventos de sistema na timeline. `activities`

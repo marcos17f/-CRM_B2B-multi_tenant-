@@ -20,6 +20,8 @@ const schema = z.object({
   type: z.enum(['new_business', 'upsell', 'renewal']),
   amount: z.string().optional(),
   expectedCloseDate: z.string().optional(),
+  season: z.string().optional(),
+  cropType: z.string().optional(),
 })
 type FormValues = z.infer<typeof schema>
 
@@ -63,6 +65,8 @@ export function OpportunityFormDialog({
         type: values.type,
         amount: values.amount ? Number(values.amount) : undefined,
         expectedCloseDate: values.expectedCloseDate || undefined,
+        season: values.season || undefined,
+        cropType: values.cropType || undefined,
       })
       toast.success('Oportunidade criada.')
       reset()
@@ -187,6 +191,17 @@ export function OpportunityFormDialog({
             <div>
               <Label htmlFor="expectedCloseDate">Previsão de fechamento</Label>
               <Input id="expectedCloseDate" type="date" {...register('expectedCloseDate')} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="season">Safra (opcional)</Label>
+              <Input id="season" placeholder="2026/2027" {...register('season')} />
+            </div>
+            <div>
+              <Label htmlFor="cropType">Cultura (opcional)</Label>
+              <Input id="cropType" placeholder="soja, milho..." {...register('cropType')} />
             </div>
           </div>
 

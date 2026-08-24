@@ -11,6 +11,10 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { InviteMemberDialog } from './invite-member-dialog'
+import { PlanCard } from './plan-card'
+import { BrandingCard } from './branding-card'
+import { WhatsappCard } from './whatsapp-card'
+import { AiSettingsCard } from './ai-settings-card'
 import { initials, formatDate } from '@/lib/utils'
 import { memberStatusLabel, roleLabel } from '@/lib/labels'
 
@@ -87,6 +91,11 @@ export function SettingsPage() {
             )}
           </CardContent>
         </Card>
+
+        <PlanCard />
+        <BrandingCard />
+        <WhatsappCard />
+        <AiSettingsCard />
       </div>
 
       <InviteMemberDialog open={inviteOpen} onOpenChange={setInviteOpen} />

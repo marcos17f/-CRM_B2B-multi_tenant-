@@ -381,6 +381,22 @@ export interface InventoryMovementsTable {
   createdAt: Generated<Date>;
 }
 
+export interface AiSettingsTable {
+  workspaceId: string;
+  provider: Generated<string>;
+  apiKey: string | null;
+  enabled: Generated<boolean>;
+  agentEnabled: Generated<boolean>;
+  model: Generated<string>;
+  thinkingMode: Generated<boolean>;
+  searchGrounding: Generated<boolean>;
+  lgpdConsentAt: Date | null;
+  telegramBotToken: string | null;
+  telegramChatId: string | null;
+  createdAt: Generated<Date>;
+  updatedAt: Generated<Date>;
+}
+
 export interface Database {
   workspaces: WorkspacesTable;
   users: UsersTable;
@@ -412,4 +428,5 @@ export interface Database {
   serviceOrders: ServiceOrdersTable;
   serviceOrderParts: ServiceOrderPartsTable;
   inventoryMovements: InventoryMovementsTable;
+  aiSettings: AiSettingsTable;
 }

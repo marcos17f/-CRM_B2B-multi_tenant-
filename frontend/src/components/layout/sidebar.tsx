@@ -8,6 +8,8 @@ import {
   Users,
   Activity,
   BarChart3,
+  Layers,
+  Package,
   Settings,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -19,6 +21,8 @@ const NAV_ITEMS = [
   { to: '/overview', label: 'Visão Geral', icon: LayoutDashboard },
   { to: '/boards', label: 'Boards', icon: KanbanSquare },
   { to: '/contacts', label: 'Contatos', icon: Users },
+  { to: '/catalog', label: 'Catálogo', icon: Package },
+  { to: '/segments', label: 'Segmentos', icon: Layers },
   { to: '/activities', label: 'Atividades', icon: Activity },
   { to: '/reports', label: 'Relatórios', icon: BarChart3 },
   { to: '/settings', label: 'Configurações', icon: Settings },

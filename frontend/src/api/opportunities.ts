@@ -20,6 +20,8 @@ export interface CreateOpportunityPayload {
   sourceCampaignId?: string
   ownerId?: string
   expectedCloseDate?: string
+  season?: string
+  cropType?: string
 }
 
 export interface UpdateOpportunityPayload {
@@ -31,6 +33,8 @@ export interface UpdateOpportunityPayload {
   type?: OpportunityType
   riskLevel?: RiskLevel
   expectedCloseDate?: string
+  season?: string
+  cropType?: string
 }
 
 export const opportunitiesApi = {

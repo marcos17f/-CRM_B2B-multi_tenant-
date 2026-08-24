@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Phone, Mail, Users, StickyNote, ArrowRightLeft, CheckCircle2, ListPlus, Bot, Settings2 } from 'lucide-react'
+import { Phone, Mail, Users, StickyNote, ArrowRightLeft, CheckCircle2, ListPlus, Bot, Settings2, MessageCircle, PencilLine } from 'lucide-react'
 import { useActivities, useCreateActivity, useMembers, usePipelines } from '@/hooks/queries'
 import { activityTypeLabel } from '@/lib/labels'
 import { formatDateTime, extractErrorMessage } from '@/lib/utils'
@@ -13,19 +13,21 @@ import { EmptyState } from '@/components/empty-state'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
 
-const ICONS: Record<string, typeof Phone> = {
+export const ACTIVITY_ICONS: Record<string, typeof Phone> = {
   call: Phone,
   email: Mail,
   meeting: Users,
   note: StickyNote,
+  whatsapp: MessageCircle,
   stage_change: ArrowRightLeft,
+  field_change: PencilLine,
   task_created: ListPlus,
   task_completed: CheckCircle2,
   system: Settings2,
   ai_suggestion: Bot,
 }
 
-function ActivityDescription({ activity, stageNameById }: { activity: Activity; stageNameById: Map<string, string> }) {
+export function ActivityDescription({ activity, stageNameById }: { activity: Activity; stageNameById: Map<string, string> }) {
   const p = activity.payload as Record<string, unknown>
 
   if (activity.type === 'stage_change') {
@@ -41,8 +43,29 @@ function ActivityDescription({ activity, stageNameById }: { activity: Activity; 
   if (activity.type === 'system' && p.event === 'created') {
     return <>Registro criado.</>
   }
+  if (activity.type === 'system' && p.event === 'completed') {
+    return <>Concluída{typeof p.partsUsed === 'number' ? ` — ${p.partsUsed} peça(s) usada(s)` : ''}.</>
+  }
+  if (activity.type === 'field_change' && p.event === 'line_item_added') {
+    return (
+      <>
+        Item adicionado: {String(p.description ?? '')} (x{String(p.quantity ?? '')})
+      </>
+    )
+  }
+  if (activity.type === 'field_change' && p.event === 'line_item_removed') {
+    return <>Item removido: {String(p.description ?? '')}</>
+  }
   if (activity.type === 'task_created' || activity.type === 'task_completed') {
     return <>Tarefa: {String(p.subject ?? '')}</>
+  }
+  if (activity.type === 'whatsapp') {
+    const direction = p.direction === 'inbound' ? 'Recebida' : 'Enviada'
+    return (
+      <>
+        {direction}: {String(p.message ?? '')}
+      </>
+    )
   }
   if (typeof p.notes === 'string' && p.notes) {
     return <>{p.notes}</>
@@ -143,7 +166,7 @@ export function ActivityTimeline({ relatedToType, relatedToId }: { relatedToType
       {!isLoading && activities && activities.length > 0 && (
         <ol className="relative space-y-4 border-l border-border pl-4">
           {activities.map((activity) => {
-            const Icon = ICONS[activity.type] ?? Settings2
+            const Icon = ACTIVITY_ICONS[activity.type] ?? Settings2
             const actor = activity.actorId ? memberNameById.get(activity.actorId) ?? 'Alguém' : 'Sistema'
             return (
               <li key={activity.id} className="relative">

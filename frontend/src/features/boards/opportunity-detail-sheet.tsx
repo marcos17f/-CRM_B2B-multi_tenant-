@@ -1,9 +1,17 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Link } from 'react-router-dom'
-import { Building2, Lock, RotateCcw } from 'lucide-react'
+import { Building2, Lock, RotateCcw, Plus, Trash2 } from 'lucide-react'
 import type { Opportunity, Pipeline } from '@/api/types'
-import { useCompany, useReopenOpportunity, useUpdateOpportunity } from '@/hooks/queries'
+import {
+  useCompany,
+  useReopenOpportunity,
+  useUpdateOpportunity,
+  useOpportunityLineItems,
+  useAddLineItem,
+  useRemoveLineItem,
+  useProducts,
+} from '@/hooks/queries'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -13,9 +21,138 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ActivityTimeline } from '@/components/activity-timeline'
 import { TaskList } from '@/components/task-list'
+import { EmptyState } from '@/components/empty-state'
 import { PermissionGate } from '@/components/permission-gate'
 import { formatCurrency, extractErrorMessage } from '@/lib/utils'
 import { opportunityStatusLabel, opportunityTypeLabel, riskLevelLabel } from '@/lib/labels'
+
+function LineItemsTab({ opportunity, isOpen }: { opportunity: Opportunity; isOpen: boolean }) {
+  const { data: lineItems, isLoading } = useOpportunityLineItems(opportunity.id)
+  const { data: products } = useProducts()
+  const addLineItem = useAddLineItem()
+  const removeLineItem = useRemoveLineItem()
+
+  const [productId, setProductId] = useState<string | undefined>(undefined)
+  const [description, setDescription] = useState('')
+  const [quantity, setQuantity] = useState('1')
+  const [unitPrice, setUnitPrice] = useState('')
+
+  function handleProductChange(id: string) {
+    setProductId(id)
+    const product = (products ?? []).find((p) => p.id === id)
+    if (product) {
+      setDescription(product.name)
+      setUnitPrice(product.price)
+    }
+  }
+
+  function handleAdd() {
+    if (!description.trim() || !quantity || !unitPrice) {
+      toast.error('Preencha descrição, quantidade e valor unitário.')
+      return
+    }
+    addLineItem.mutate(
+      { opportunityId: opportunity.id, payload: { productId, description, quantity: Number(quantity), unitPrice: Number(unitPrice) } },
+      {
+        onSuccess: () => {
+          toast.success('Item adicionado.')
+          setProductId(undefined)
+          setDescription('')
+          setQuantity('1')
+          setUnitPrice('')
+        },
+        onError: (err) => toast.error(extractErrorMessage(err)),
+      },
+    )
+  }
+
+  function handleRemove(lineItemId: string) {
+    removeLineItem.mutate(
+      { opportunityId: opportunity.id, lineItemId },
+      { onSuccess: () => toast.success('Item removido.'), onError: (err) => toast.error(extractErrorMessage(err)) },
+    )
+  }
+
+  if (isLoading) return null
+
+  return (
+    <div className="space-y-3">
+      {(lineItems?.length ?? 0) === 0 ? (
+        <EmptyState title="Nenhum item de linha" description="Adicione máquinas, sementes, grãos ou peças — o valor da oportunidade passa a ser calculado automaticamente." />
+      ) : (
+        <div className="space-y-2">
+          {lineItems!.map((item) => (
+            <div key={item.id} className="flex items-center justify-between rounded-md border border-border bg-surface px-3 py-2">
+              <div>
+                <p className="text-sm text-text">{item.description}</p>
+                <p className="text-xs text-text-faint">
+                  {item.quantity} × {formatCurrency(item.unitPrice, opportunity.currency)} = {formatCurrency(item.subtotal, opportunity.currency)}
+                </p>
+              </div>
+              {isOpen && (
+                <PermissionGate permission="opportunities:write">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => handleRemove(item.id)}
+                    disabled={removeLineItem.isPending}
+                  >
+                    <Trash2 className="h-3.5 w-3.5 text-danger" />
+                  </Button>
+                </PermissionGate>
+              )}
+            </div>
+          ))}
+          <div className="flex items-center justify-between px-1 pt-1 text-sm font-medium text-text">
+            <span>Total</span>
+            <span>{formatCurrency(opportunity.amount, opportunity.currency)}</span>
+          </div>
+        </div>
+      )}
+
+      {isOpen && (
+        <PermissionGate permission="opportunities:write">
+          <div className="rounded-md border border-border bg-bg-subtle p-3 space-y-2">
+            <div>
+              <Label>Produto do catálogo (opcional)</Label>
+              <Select value={productId} onValueChange={handleProductChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Item avulso (sem catálogo)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(products ?? []).map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name} ({p.sku})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="li-description">Descrição</Label>
+              <Input id="li-description" value={description} onChange={(e) => setDescription(e.target.value)} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="li-quantity">Quantidade</Label>
+                <Input id="li-quantity" type="number" min={0} step="0.001" value={quantity} onChange={(e) => setQuantity(e.target.value)} />
+              </div>
+              <div>
+                <Label htmlFor="li-price">Valor unitário</Label>
+                <Input id="li-price" type="number" min={0} step="0.01" value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} />
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button size="sm" onClick={handleAdd} disabled={addLineItem.isPending}>
+                <Plus className="h-3.5 w-3.5 mr-1.5" /> Adicionar item
+              </Button>
+            </div>
+          </div>
+        </PermissionGate>
+      )}
+    </div>
+  )
+}
 
 export function OpportunityDetailSheet({
   opportunity,
@@ -108,6 +245,7 @@ export function OpportunityDetailSheet({
         <Tabs defaultValue="details">
           <TabsList>
             <TabsTrigger value="details">Detalhes</TabsTrigger>
+            <TabsTrigger value="items">Itens</TabsTrigger>
             <TabsTrigger value="activities">Atividades</TabsTrigger>
             <TabsTrigger value="tasks">Tarefas</TabsTrigger>
           </TabsList>
@@ -167,6 +305,10 @@ export function OpportunityDetailSheet({
                 </div>
               </PermissionGate>
             )}
+          </TabsContent>
+
+          <TabsContent value="items">
+            <LineItemsTab opportunity={opportunity} isOpen={isOpen} />
           </TabsContent>
 
           <TabsContent value="activities">

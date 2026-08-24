@@ -4,6 +4,7 @@ import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { ActivitiesModule } from './activities/activities.module';
 import { AiModule } from './ai/ai.module';
+import { AiAgentModule } from './ai-agent/ai-agent.module';
 import { AuthModule } from './auth/auth.module';
 import { CampaignsModule } from './campaigns/campaigns.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
@@ -49,6 +50,7 @@ import { WorkspacesModule } from './workspaces/workspaces.module';
     ActivitiesModule,
     WorkflowsModule,
     AiModule,
+    AiAgentModule,
     ReportsModule,
     SegmentsModule,
     WhatsappModule,
