@@ -5,6 +5,7 @@ import type { Kysely } from 'kysely';
 import type { Database } from '../../db/types';
 import { KYSELY_RAW } from '../database/database.constants';
 import { TenantDb } from '../database/tenant-db.service';
+import { PlansService } from '../plans/plans.service';
 import type { InviteMemberDto } from './dto/invite-member.dto';
 
 @Injectable()
@@ -14,6 +15,7 @@ export class MembersService {
     @Inject(KYSELY_RAW) private readonly rawDb: Kysely<Database>,
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
+    private readonly plans: PlansService,
   ) {}
 
   list() {
@@ -28,6 +30,8 @@ export class MembersService {
   }
 
   async invite(dto: InviteMemberDto) {
+    await this.plans.assertWithinLimit('seats');
+
     const role = await this.tenantDb.db
       .selectFrom('roles')
       .select('id')

@@ -3,7 +3,9 @@ import type { Updateable } from 'kysely';
 import type { OpportunitiesTable } from '../../db/types';
 import { ActivitiesService } from '../activities/activities.service';
 import { TenantDb } from '../database/tenant-db.service';
+import { PlansService } from '../plans/plans.service';
 import { WorkflowsService } from '../workflows/workflows.service';
+import { OpportunityLineItemsService } from './opportunity-line-items.service';
 import type { CreateOpportunityDto } from './dto/create-opportunity.dto';
 import type { MoveStageDto } from './dto/move-stage.dto';
 import type { ReopenOpportunityDto } from './dto/reopen-opportunity.dto';
@@ -22,6 +24,8 @@ export class OpportunitiesService {
     private readonly tenantDb: TenantDb,
     private readonly activities: ActivitiesService,
     private readonly workflows: WorkflowsService,
+    private readonly plans: PlansService,
+    private readonly lineItems: OpportunityLineItemsService,
   ) {}
 
   list(filters: OpportunityFilters) {
@@ -54,6 +58,7 @@ export class OpportunitiesService {
   }
 
   async create(dto: CreateOpportunityDto) {
+    await this.plans.assertWithinLimit('opportunities');
     await this.assertStageBelongsToPipeline(dto.stageId, dto.pipelineId);
 
     const opportunity = await this.tenantDb.db
@@ -71,6 +76,8 @@ export class OpportunitiesService {
         sourceCampaignId: dto.sourceCampaignId ?? null,
         ownerId: dto.ownerId ?? this.tenantDb.workspaceMemberId,
         expectedCloseDate: dto.expectedCloseDate ?? null,
+        season: dto.season ?? null,
+        cropType: dto.cropType ?? null,
       })
       .returningAll()
       .executeTakeFirstOrThrow();
@@ -101,6 +108,8 @@ export class OpportunitiesService {
     if (dto.type !== undefined) values.type = dto.type;
     if (dto.riskLevel !== undefined) values.riskLevel = dto.riskLevel;
     if (dto.expectedCloseDate !== undefined) values.expectedCloseDate = dto.expectedCloseDate;
+    if (dto.season !== undefined) values.season = dto.season;
+    if (dto.cropType !== undefined) values.cropType = dto.cropType;
 
     return this.tenantDb.db
       .updateTable('opportunities')
@@ -148,6 +157,13 @@ export class OpportunitiesService {
       relatedToId: id,
       payload: { fromStageId: opportunity.stageId, toStageId: stage.id, fromStatus: opportunity.status, toStatus: newStatus },
     });
+
+    // Debita estoque dos line items com productId ao ganhar o deal (guia agro: venda de
+    // máquina/semente/peça baixa o estoque do catálogo). Reabrir e vender de novo debita
+    // de novo — não há reversão automática do estoque ao reabrir um deal ganho.
+    if (newStatus === 'won') {
+      await this.lineItems.processWinInventory(id);
+    }
 
     await this.workflows.handleOpportunityStageChanged(updated);
 

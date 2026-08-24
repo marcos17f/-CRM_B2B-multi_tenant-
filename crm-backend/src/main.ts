@@ -6,7 +6,9 @@ import helmet from 'helmet';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // rawBody: true expõe request.rawBody — necessário pra validar a assinatura
+  // X-Hub-Signature-256 do webhook do WhatsApp (ver WhatsappWebhookService.verifySignature).
+  const app = await NestFactory.create(AppModule, { rawBody: true });
 
   app.use(helmet());
   app.enableCors();

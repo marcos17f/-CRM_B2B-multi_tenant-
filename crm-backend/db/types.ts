@@ -16,10 +16,22 @@ export interface WorkspacesTable {
   name: string;
   slug: string;
   status: Generated<string>;
-  planId: string | null;
+  planId: Generated<string>;
   settings: Generated<Json>;
   createdAt: Generated<Date>;
   updatedAt: Generated<Date>;
+}
+
+export interface PlansTable {
+  id: string;
+  name: string;
+  monthlyPriceCents: number | null;
+  maxSeats: number | null;
+  maxCompanies: number | null;
+  maxContacts: number | null;
+  maxOpportunities: number | null;
+  isActive: Generated<boolean>;
+  createdAt: Generated<Date>;
 }
 
 export interface UsersTable {
@@ -159,6 +171,8 @@ export interface OpportunitiesTable {
   ownerId: string | null;
   expectedCloseDate: string | null;
   closedAt: Date | null;
+  season: string | null;
+  cropType: string | null;
   createdAt: Generated<Date>;
   updatedAt: Generated<Date>;
 }
@@ -220,6 +234,153 @@ export interface AiSuggestionsTable {
   resolvedAt: Date | null;
 }
 
+export interface CustomerRfmSnapshotsTable {
+  id: Generated<string>;
+  workspaceId: string;
+  companyId: string;
+  computedAt: Generated<Date>;
+  periodMonths: Generated<number>;
+  lastPurchaseAt: Date | null;
+  recencyDays: number | null;
+  frequencyCount: Generated<number>;
+  monetaryTotal: Generated<string>;
+  lifetimeMonetaryTotal: Generated<string>;
+  recencyScore: number | null;
+  frequencyScore: number | null;
+  monetaryScore: number | null;
+  rfmSegment: string | null;
+}
+
+export interface SegmentsTable {
+  id: Generated<string>;
+  workspaceId: string;
+  name: string;
+  type: string;
+  criteria: Json | null;
+  createdBy: string | null;
+  createdAt: Generated<Date>;
+  updatedAt: Generated<Date>;
+}
+
+export interface SegmentMembersTable {
+  segmentId: string;
+  companyId: string;
+  addedAt: Generated<Date>;
+}
+
+export interface IntegrationConnectionsTable {
+  id: Generated<string>;
+  workspaceId: string;
+  provider: string;
+  externalId: string;
+  wabaId: string | null;
+  displayPhone: string | null;
+  accessToken: string;
+  status: Generated<string>;
+  connectedBy: string | null;
+  createdAt: Generated<Date>;
+  updatedAt: Generated<Date>;
+}
+
+export interface WhatsappMessagesTable {
+  id: Generated<string>;
+  workspaceId: string;
+  wamid: string;
+  direction: string;
+  contactId: string | null;
+  activityId: string | null;
+  status: Generated<string>;
+  createdAt: Generated<Date>;
+}
+
+export interface ProductsTable {
+  id: Generated<string>;
+  workspaceId: string;
+  sku: string;
+  name: string;
+  category: string;
+  unit: Generated<string>;
+  price: Generated<string>;
+  trackStock: Generated<boolean>;
+  stockQuantity: Generated<string>;
+  status: Generated<string>;
+  customFields: Generated<Json>;
+  createdBy: string | null;
+  createdAt: Generated<Date>;
+  updatedAt: Generated<Date>;
+}
+
+export interface OpportunityLineItemsTable {
+  id: Generated<string>;
+  workspaceId: string;
+  opportunityId: string;
+  productId: string | null;
+  description: string;
+  quantity: string;
+  unitPrice: string;
+  subtotal: Generated<string>;
+  createdAt: Generated<Date>;
+}
+
+export interface EquipmentTable {
+  id: Generated<string>;
+  workspaceId: string;
+  companyId: string;
+  productId: string | null;
+  name: string;
+  manufacturer: string | null;
+  model: string | null;
+  serialNumber: string | null;
+  purchaseDate: string | null;
+  status: Generated<string>;
+  customFields: Generated<Json>;
+  createdBy: string | null;
+  createdAt: Generated<Date>;
+  updatedAt: Generated<Date>;
+}
+
+export interface ServiceOrdersTable {
+  id: Generated<string>;
+  workspaceId: string;
+  companyId: string;
+  contactId: string | null;
+  equipmentId: string | null;
+  type: Generated<string>;
+  status: Generated<string>;
+  description: string | null;
+  technicianId: string | null;
+  scheduledDate: Date | null;
+  completedAt: Date | null;
+  createdBy: string | null;
+  createdAt: Generated<Date>;
+  updatedAt: Generated<Date>;
+}
+
+export interface ServiceOrderPartsTable {
+  id: Generated<string>;
+  workspaceId: string;
+  serviceOrderId: string;
+  productId: string;
+  description: string;
+  quantity: string;
+  unitPrice: string;
+  subtotal: Generated<string>;
+  createdAt: Generated<Date>;
+}
+
+export interface InventoryMovementsTable {
+  id: Generated<string>;
+  workspaceId: string;
+  productId: string;
+  type: string;
+  quantityDelta: string;
+  relatedToType: string | null;
+  relatedToId: string | null;
+  actorId: string | null;
+  note: string | null;
+  createdAt: Generated<Date>;
+}
+
 export interface Database {
   workspaces: WorkspacesTable;
   users: UsersTable;
@@ -239,4 +400,16 @@ export interface Database {
   activities: ActivitiesTable;
   workflowSettings: WorkflowSettingsTable;
   aiSuggestions: AiSuggestionsTable;
+  customerRfmSnapshots: CustomerRfmSnapshotsTable;
+  segments: SegmentsTable;
+  segmentMembers: SegmentMembersTable;
+  integrationConnections: IntegrationConnectionsTable;
+  whatsappMessages: WhatsappMessagesTable;
+  plans: PlansTable;
+  products: ProductsTable;
+  opportunityLineItems: OpportunityLineItemsTable;
+  equipment: EquipmentTable;
+  serviceOrders: ServiceOrdersTable;
+  serviceOrderParts: ServiceOrderPartsTable;
+  inventoryMovements: InventoryMovementsTable;
 }

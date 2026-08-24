@@ -3,12 +3,16 @@ import type { Updateable } from 'kysely';
 import type { ContactsTable } from '../../db/types';
 import { isPgUniqueViolation } from '../common/db/pg-errors';
 import { TenantDb } from '../database/tenant-db.service';
+import { PlansService } from '../plans/plans.service';
 import type { CreateContactDto } from './dto/create-contact.dto';
 import type { UpdateContactDto } from './dto/update-contact.dto';
 
 @Injectable()
 export class ContactsService {
-  constructor(private readonly tenantDb: TenantDb) {}
+  constructor(
+    private readonly tenantDb: TenantDb,
+    private readonly plans: PlansService,
+  ) {}
 
   list(companyId?: string) {
     let query = this.tenantDb.db
@@ -33,6 +37,8 @@ export class ContactsService {
   }
 
   async create(dto: CreateContactDto) {
+    await this.plans.assertWithinLimit('contacts');
+
     try {
       return await this.tenantDb.db
         .insertInto('contacts')

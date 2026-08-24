@@ -33,4 +33,11 @@ export class CreateOpportunityDto {
 
   @IsOptional() @IsDateString()
   expectedCloseDate?: string;
+
+  /** Sazonalidade agrícola (ex.: "2026/2027") — pra planejar vendas de sementes/insumos por época. */
+  @IsOptional() @IsString()
+  season?: string;
+
+  @IsOptional() @IsString()
+  cropType?: string;
 }

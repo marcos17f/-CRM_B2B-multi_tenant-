@@ -25,8 +25,19 @@ export const PERMISSIONS = {
   TASKS_WRITE: 'tasks:write',
   ACTIVITIES_READ: 'activities:read',
   ACTIVITIES_WRITE: 'activities:write',
+  REPORTS_READ: 'reports:read', // RFM, top customers
+  SEGMENTS_READ: 'segments:read',
+  SEGMENTS_WRITE: 'segments:write',
+  INTEGRATIONS_MANAGE: 'integrations:manage', // conectar/desconectar WhatsApp etc.
+  WHATSAPP_SEND: 'whatsapp:send',
+  PRODUCTS_READ: 'products:read',
+  PRODUCTS_WRITE: 'products:write',
+  EQUIPMENT_READ: 'equipment:read',
+  EQUIPMENT_WRITE: 'equipment:write',
+  SERVICE_ORDERS_READ: 'service_orders:read',
+  SERVICE_ORDERS_WRITE: 'service_orders:write',
   MEMBERS_MANAGE: 'members:manage', // convidar/remover pessoas, mudar role
-  WORKSPACE_MANAGE: 'workspace:manage', // configurações do workspace
+  WORKSPACE_MANAGE: 'workspace:manage', // configurações do workspace, plano/branding
 } as const;
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -42,6 +53,14 @@ export const SYSTEM_ROLES: Record<string, string[]> = {
     'opportunities:*',
     'tasks:*',
     'activities:*',
+    'reports:read',
+    'segments:read',
+    'segments:write',
+    'integrations:manage',
+    'whatsapp:send',
+    'products:*',
+    'equipment:*',
+    'service_orders:*',
     'members:manage',
   ],
   sales_rep: [
@@ -57,6 +76,15 @@ export const SYSTEM_ROLES: Record<string, string[]> = {
     'tasks:write',
     'activities:read',
     'activities:write',
+    'reports:read',
+    'segments:read',
+    'whatsapp:send',
+    'products:read',
+    'products:write',
+    'equipment:read',
+    'equipment:write',
+    'service_orders:read',
+    'service_orders:write',
   ],
   read_only: [
     'companies:read',
@@ -66,6 +94,11 @@ export const SYSTEM_ROLES: Record<string, string[]> = {
     'opportunities:read',
     'tasks:read',
     'activities:read',
+    'reports:read',
+    'segments:read',
+    'products:read',
+    'equipment:read',
+    'service_orders:read',
   ],
 };
 

@@ -12,11 +12,18 @@ import { TenantInterceptor } from './common/tenant/tenant.interceptor';
 import { CompaniesModule } from './companies/companies.module';
 import { ContactsModule } from './contacts/contacts.module';
 import { DatabaseModule } from './database/database.module';
+import { EquipmentModule } from './equipment/equipment.module';
 import { HealthController } from './health.controller';
 import { MembersModule } from './members/members.module';
 import { OpportunitiesModule } from './opportunities/opportunities.module';
 import { PipelinesModule } from './pipelines/pipelines.module';
+import { PlansModule } from './plans/plans.module';
+import { ProductsModule } from './products/products.module';
+import { ReportsModule } from './reports/reports.module';
+import { SegmentsModule } from './segments/segments.module';
+import { ServiceOrdersModule } from './service-orders/service-orders.module';
 import { TasksModule } from './tasks/tasks.module';
+import { WhatsappModule } from './whatsapp/whatsapp.module';
 import { WorkflowsModule } from './workflows/workflows.module';
 import { WorkspacesModule } from './workspaces/workspaces.module';
 
@@ -32,6 +39,7 @@ import { WorkspacesModule } from './workspaces/workspaces.module';
     AuthModule,
     MembersModule,
     WorkspacesModule,
+    PlansModule,
     CompaniesModule,
     ContactsModule,
     CampaignsModule,
@@ -41,6 +49,12 @@ import { WorkspacesModule } from './workspaces/workspaces.module';
     ActivitiesModule,
     WorkflowsModule,
     AiModule,
+    ReportsModule,
+    SegmentsModule,
+    WhatsappModule,
+    ProductsModule,
+    EquipmentModule,
+    ServiceOrdersModule,
   ],
   controllers: [HealthController],
   providers: [

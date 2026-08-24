@@ -6,3 +6,7 @@ export function isPgUniqueViolation(err: unknown): boolean {
 export function isPgCheckViolation(err: unknown): boolean {
   return typeof err === 'object' && err !== null && (err as { code?: string }).code === '23514';
 }
+
+export function isPgForeignKeyViolation(err: unknown): boolean {
+  return typeof err === 'object' && err !== null && (err as { code?: string }).code === '23503';
+}

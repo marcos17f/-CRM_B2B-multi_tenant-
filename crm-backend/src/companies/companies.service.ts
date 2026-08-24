@@ -2,12 +2,16 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import type { Updateable } from 'kysely';
 import type { CompaniesTable } from '../../db/types';
 import { TenantDb } from '../database/tenant-db.service';
+import { PlansService } from '../plans/plans.service';
 import type { CreateCompanyDto } from './dto/create-company.dto';
 import type { UpdateCompanyDto } from './dto/update-company.dto';
 
 @Injectable()
 export class CompaniesService {
-  constructor(private readonly tenantDb: TenantDb) {}
+  constructor(
+    private readonly tenantDb: TenantDb,
+    private readonly plans: PlansService,
+  ) {}
 
   list() {
     return this.tenantDb.db
@@ -31,7 +35,9 @@ export class CompaniesService {
     return company;
   }
 
-  create(dto: CreateCompanyDto) {
+  async create(dto: CreateCompanyDto) {
+    await this.plans.assertWithinLimit('companies');
+
     return this.tenantDb.db
       .insertInto('companies')
       .values({

@@ -26,4 +26,10 @@ export class UpdateOpportunityDto {
 
   @IsOptional() @IsDateString()
   expectedCloseDate?: string;
+
+  @IsOptional() @IsString()
+  season?: string;
+
+  @IsOptional() @IsString()
+  cropType?: string;
 }

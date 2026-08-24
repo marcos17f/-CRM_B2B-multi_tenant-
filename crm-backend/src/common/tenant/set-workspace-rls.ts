@@ -15,3 +15,13 @@ export async function setWorkspaceRlsContext(
 ): Promise<void> {
   await sql`select set_config('app.current_workspace_id', ${workspaceId}, true)`.execute(trx);
 }
+
+/**
+ * Ativa a policy `webhook_lookup` de `integration_connections` (ver migration 011) dentro
+ * da transação atual — único jeito de descobrir a que workspace um phone_number_id do
+ * WhatsApp pertence quando um evento de webhook chega sem tenant resolvido. Usado só por
+ * WhatsappWebhookService.resolveConnection; nunca pelo TenantInterceptor.
+ */
+export async function setWhatsappWebhookLookupContext(trx: Transaction<Database> | Kysely<Database>): Promise<void> {
+  await sql`select set_config('app.whatsapp_webhook_lookup', 'true', true)`.execute(trx);
+}
