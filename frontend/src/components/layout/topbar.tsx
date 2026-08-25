@@ -5,6 +5,7 @@ import { useAuth } from '@/context/auth-context'
 import { useTheme } from '@/context/theme-context'
 import { useCompanies, useContacts } from '@/hooks/queries'
 import { useCurrentMember } from '@/hooks/use-current-member'
+import { MobileNav } from './mobile-nav'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -42,7 +43,8 @@ export function Topbar() {
   const hasResults = results.companies.length > 0 || results.contacts.length > 0
 
   return (
-    <header className="flex h-14 items-center gap-4 border-b border-border bg-topbar px-4">
+    <header className="flex h-14 items-center gap-2 border-b border-border bg-topbar px-4">
+      <MobileNav />
       <Popover open={query.trim().length > 0 && hasResults}>
         <PopoverTrigger asChild>
           <div className="relative w-full max-w-sm">
